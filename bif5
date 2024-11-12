@@ -1,0 +1,115 @@
+
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+# Load the dataset
+file_path = 'Genomics.csv'  # Adjust path if needed
+genomics_data = pd.read_csv('Genomics.csv')
+
+# Display the first few rows
+genomics_data.head()
+
+
+genomics_data.isnull().sum()
+
+genomics_data = genomics_data.dropna()
+
+genomics_data.isnull().sum()
+
+label_encoder = LabelEncoder()
+genomics_data['variant_label'] = label_encoder.fit_transform(genomics_data['variant_name'])
+genomics_data
+
+
+
+# Encode the target variable (variant_name) using LabelEncoder
+
+# Features and target
+X = genomics_data[['specimens', 'percentage', 'specimens_7d_avg', 'percentage_7d_avg']]
+y = genomics_data['variant_label']
+
+# Fill any remaining NaN values with 0 in the feature columns (for safety)
+X.fillna(0, inplace=True)
+
+# Split the dataset into training and testing sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+
+# Initialize the Random Forest model
+rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# Train the model
+rf_classifier.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred_rf = rf_classifier.predict(X_test)
+
+# Evaluate the model performance
+print("Random Forest Classification Report:\n", classification_report(y_test, y_pred_rf))
+print("Random Forest Accuracy Score:", accuracy_score(y_test, y_pred_rf))
+
+
+# Initialize the SVM model
+svm_classifier = SVC(kernel='linear')
+
+# Train the model
+svm_classifier.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred_svm = svm_classifier.predict(X_test)
+
+# Evaluate the model performance
+print("SVM Classification Report:\n", classification_report(y_test, y_pred_svm))
+print("SVM Accuracy Score:", accuracy_score(y_test, y_pred_svm))
+
+
+#heatmap for Random Forest
+cm_rf = confusion_matrix(y_test, y_pred_rf)
+sns.heatmap(cm_rf, annot=True, fmt='d', cmap='Blues')
+plt.title('Random Forest Heatmap')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+
+# heatmap for SVM
+cm_svm = confusion_matrix(y_test, y_pred_svm)
+sns.heatmap(cm_svm, annot=True, fmt='d', cmap='Greens')
+plt.title('SVM Heatmap')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+
+
+# Feature Importance from Random Forest
+feature_importances = rf_classifier.feature_importances_
+features = X.columns
+
+# Visualize Feature Importance
+plt.figure(figsize=(8, 6))
+sns.barplot(x=feature_importances, y=features)
+plt.title('Feature Importance (Random Forest)')
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
