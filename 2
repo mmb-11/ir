@@ -1,0 +1,41 @@
+!pip install nltk
+
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from collections import defaultdict
+
+stemmer = PorterStemmer()
+stop_words = set(stopwords.words('english'))
+
+doc_dict = [
+    ['d1','welcome to hotel heaven such a lovely place'],
+    ['d2', ' She is taking Stairway to heaven'],
+    ['d3',"Don't make it bad"],
+    ['d4','Take me to heaven']    
+]
+
+inverted_index = defaultdict(list)
+
+for doc_id, text in doc_dict:
+    words = [stemmer.stem(word)for word in word_tokenize(text.lower()) if word.isalnum() and word not in stop_words]
+    for word in words:
+        if doc_id not in inverted_index[word]:
+            inverted_index[word].append(doc_id)
+
+print('INVERTED INDEX:---')
+for word, doc_id in inverted_index.items():
+    print(f'{word} :  {doc_id}')
+
+query = input('ENter Words to be searched ').strip().lower()
+words = [stemmer.stem(word)for word in word_tokenize(query.lower()) if word.isalnum() and word not in stop_words]
+
+print("\nSearch Results:")
+for term in query_terms:
+    if term in inverted_index:
+        print(f"The word '{term}' is found in documents: {inverted_index[term]}")
+    else:
+        print(f"The word '{term}' is not found in any document.")
+
+
